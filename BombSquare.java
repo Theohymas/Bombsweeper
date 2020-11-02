@@ -24,7 +24,6 @@ public class BombSquare extends GameSquare
 
     public void rightClicked()
     {
-        hasBomb = true;
         if(this.hasBomb == true)
         {
             System.out.println("bomb clicked");

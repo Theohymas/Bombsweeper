@@ -16,7 +16,7 @@ public class GameBoard extends JFrame
 
 	private int boardHeight;
 	private int boardWidth;
-    private GameSquare[][] board; 
+    private GameSquare[][] board;
     private Constructor<?> makeSquare;
 
 	/**

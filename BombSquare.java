@@ -1,16 +1,14 @@
-import javax.xml.stream.events.StartDocument;
+import java.util.ArrayList;
 
 public class BombSquare extends GameSquare
 {
     private GameBoard board;                            // Object reference to the GameBoard this square is part of.
     private boolean hasBomb;                            // True if this squre contains a bomb. False otherwise.
-    
-    private int xLocation;
-    private int yLocation;
 
     private boolean rightClickedStatus = false;
     private boolean leftClickedStatus = false;
 
+    private ArrayList<BombSquare> surroundingsArray = new ArrayList<>();
 
 	public static final int MINE_PROBABILITY = 10;
 
@@ -28,56 +26,66 @@ public class BombSquare extends GameSquare
         {
             System.out.println("bomb clicked");
             this.setImage("images/bomb.png");
+            leftClickedStatus = true;
         }
-        rightClickedStatus = true;
+        else
+        {
+            this.setNumber(surroundingsCounter());
+            leftClickedStatus = true;
+        }
     }
 
     public void rightClicked()
     {
-
         if(rightClickedStatus == false)
         {
             this.setImage("images/flag.png");
             rightClickedStatus = true;
         }
-        else if(rightClickedStatus == true)
+        else if(rightClickedStatus)
         {
             this.setImage("images/blank.png");
             rightClickedStatus = false;
         }
     }
 
-    // public int surroundingBombs()
-    // {
-    //     int bombCounter = 0;
+    public void surroundingBombs()
+    {
+        for(int x = -1 ; x <= 1 ; x++)
+        {
+            for(int y = -1; y <= 1; y++)
+            {
+                int aX = this.getXLocation()+ x;
+                int aY = this.getYLocation()+ y;
 
-        // int startX = super.getXlocation();
-        // int startY = this.getYlocation();
+                System.out.println("aX ==>  " + (aX + x));
+                System.out.println("aY ==>  " + (aY + y));
 
-        // for(int x = -1 ; x <= 1 ; x++)
-        // {
-        //     for(int y = 0; y <= 1; y++)
-        //     {
-        //         GameSquare current = board.getSquareAt(startX + x, startY + y);
-        //         if(current.hasBomb == true)
-        //         {
-        //             bombCounter++;
-        //         }
-        //     }
-        // }
-        // return bombCounter;
+                BombSquare current = (BombSquare) board.getSquareAt(aX, aY);
 
-        
-    // public void useThisForsurroundingbombs()
-    // {
-    //     int startX = this.getXlocation();
-    //     System.out.println("Test:   "+ this.getXlocation());
-    // }
+                surroundingsArray.add(current);
+            }
+        }
+        for(int i = 0; i < surroundingsArray.size(); i++)
+        {
+            System.out.println("===>" + surroundingsArray.get(i).hasBomb);
+        }
+    }
+
+    public void setNumber(int bombCounter)
+    {
+        this.setImage("images/" + bombCounter + ".png");
+    }
+
+    public int surroundingsCounter()
+    {
+        this.surroundingBombs();
+
+        int bombCounter = 0;
+        for(BombSquare square: surroundingsArray)
+        {
+            bombCounter += (square.hasBomb? 1:0);
+        }
+        return bombCounter;
+    }
 }
-
-    // public String bombCounterImage
-    // (
-    //     if(this.surroundingBombs())
-    // )
-
-

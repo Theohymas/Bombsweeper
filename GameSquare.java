@@ -56,7 +56,6 @@ public abstract class GameSquare extends JButton
         return yLocation;
     }
 
-
 	/**
 	 * A method that is invoked when a user clicks on this square.
 	 * 

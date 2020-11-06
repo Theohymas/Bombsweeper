@@ -10,6 +10,8 @@ public class BombSquare extends GameSquare
 
     private ArrayList<BombSquare> surroundingsArray = new ArrayList<>();
 
+    private boolean emptyStatus = false;
+
 	public static final int MINE_PROBABILITY = 10;
 
 	public BombSquare(int x, int y, GameBoard board)
@@ -22,16 +24,9 @@ public class BombSquare extends GameSquare
 
     public void leftClicked()
     {
-        if(this.hasBomb == true)
+        if(leftClickedStatus == false)
         {
-            System.out.println("bomb clicked");
-            this.setImage("images/bomb.png");
-            leftClickedStatus = true;
-        }
-        else
-        {
-            this.setNumber(surroundingsCounter());
-            leftClickedStatus = true;
+            leftClickIcon();
         }
     }
 
@@ -42,7 +37,7 @@ public class BombSquare extends GameSquare
             this.setImage("images/flag.png");
             rightClickedStatus = true;
         }
-        else if(rightClickedStatus)
+        else
         {
             this.setImage("images/blank.png");
             rightClickedStatus = false;
@@ -55,20 +50,8 @@ public class BombSquare extends GameSquare
         {
             for(int y = -1; y <= 1; y++)
             {
-                int aX = this.getXLocation()+ x;
-                int aY = this.getYLocation()+ y;
-
-                System.out.println("aX ==>  " + (aX + x));
-                System.out.println("aY ==>  " + (aY + y));
-
-                BombSquare current = (BombSquare) board.getSquareAt(aX, aY);
-
-                surroundingsArray.add(current);
+                addToArrray(x, y);
             }
-        }
-        for(int i = 0; i < surroundingsArray.size(); i++)
-        {
-            System.out.println("===>" + surroundingsArray.get(i).hasBomb);
         }
     }
 
@@ -86,6 +69,65 @@ public class BombSquare extends GameSquare
         {
             bombCounter += (square.hasBomb? 1:0);
         }
+
+        if(bombCounter == 0)
+        {
+            emptyStatus = true;
+        }
         return bombCounter;
+    }
+
+    public void leftClickIcon()
+    {
+        int bombCount = surroundingsCounter();
+
+        if(this.hasBomb == true)
+        {
+            this.setImage("images/bomb.png");
+            leftClickedStatus = true;
+        }
+        else if(bombCount == 0)
+        {
+            revealEmptys();
+        }
+        else
+        {
+            this.setNumber(bombCount);
+            leftClickedStatus = true;
+        }
+    }
+
+    public void addToArrray(int x, int y)
+    {
+        int aX = this.getXLocation()+ x;
+        int aY = this.getYLocation()+ y;
+
+        System.out.println("aX ==>  " + (aX + x));
+        System.out.println("aY ==>  " + (aY + y));
+
+        BombSquare current = (BombSquare) board.getSquareAt(aX, aY);
+
+        this.surroundingsArray.add(current);
+    }
+
+    public void revealEmptys()
+    {
+        //adds surrounding squares to the surroundingsArray
+        
+        surroundingBombs();
+
+        for(BombSquare square: this.surroundingsArray)
+        {
+            //for every bomb square, if false then return out of method, else print blank icon on all 
+            if(square.emptyStatus == false)
+            {
+                return;
+            }
+        }
+        for(BombSquare square: this.surroundingsArray)
+        {
+            square.setNumber(surroundingsCounter());
+        }
+        revealEmptys();
     }
 }

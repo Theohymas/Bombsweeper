@@ -4,16 +4,22 @@ public class BombSquare extends GameSquare
 {
     private GameBoard board;                            // Object reference to the GameBoard this square is part of.
     private boolean hasBomb;                            // True if this squre contains a bomb. False otherwise.
+    private int surroundingsCounter;
 
     private boolean rightClickedStatus = false;
     private boolean leftClickedStatus = false;
 
     private ArrayList<BombSquare> surroundingsArray = new ArrayList<>();
 
-    private boolean emptyStatus = false;
-
 	public static final int MINE_PROBABILITY = 10;
 
+	/**
+	 * Create a new BombSquare, which can be placed on a GameBoard.
+	 * 
+	 * @param x the x co-ordinate of this square on the game board.
+	 * @param y the y co-ordinate of this square on the game board.
+	 * @param board the Gmaeboard on which the Bombsquare is placed.
+	 */
 	public BombSquare(int x, int y, GameBoard board)
 	{
 		super(x, y, "images/blank.png");
@@ -22,6 +28,10 @@ public class BombSquare extends GameSquare
         this.hasBomb = ((int) (Math.random() * MINE_PROBABILITY)) == 0;
     }
 
+    
+	/**
+	 * invoked when mouse is left clicked.
+	 */	
     public void leftClicked()
     {
         if(leftClickedStatus == false)
@@ -30,6 +40,9 @@ public class BombSquare extends GameSquare
         }
     }
 
+    /**
+	 * invoked wehn mouse is right clicked
+	 */	
     public void rightClicked()
     {
         if(rightClickedStatus == false)
@@ -44,6 +57,9 @@ public class BombSquare extends GameSquare
         }
     }
 
+    /**
+	 * iterates through the squares' surrounding squares
+	 */	
     public void surroundingBombs()
     {
         for(int x = -1 ; x <= 1 ; x++)
@@ -55,79 +71,93 @@ public class BombSquare extends GameSquare
         }
     }
 
+    /**
+	 * Change the image displayed by this square to the correct number, displaying number of surrounding bombs
+	 * 
+	 * @param bombCounter the integer to be displayed on the Square
+	 */	
     public void setNumber(int bombCounter)
     {
         this.setImage("images/" + bombCounter + ".png");
     }
 
-    public int surroundingsCounter()
+    /**
+	 * Calculates the number of surrounding bombs and stores int in surroundingsCounter.
+	 */	
+    public void surroundingsCounter()
     {
-        this.surroundingBombs();
+        surroundingBombs();
 
-        int bombCounter = 0;
         for(BombSquare square: surroundingsArray)
         {
-            bombCounter += (square.hasBomb? 1:0);
+            surroundingsCounter += (square.hasBomb? 1:0);
         }
-
-        if(bombCounter == 0)
-        {
-            emptyStatus = true;
-        }
-        return bombCounter;
     }
 
+    /**
+	 * Sets the square icon to correct image for a left click
+	 */	
     public void leftClickIcon()
     {
-        int bombCount = surroundingsCounter();
+        surroundingsCounter();
 
         if(this.hasBomb == true)
         {
             this.setImage("images/bomb.png");
             leftClickedStatus = true;
         }
-        else if(bombCount == 0)
+        else if(this.surroundingsCounter == 0)
         {
-            revealEmptys();
+            System.out.println("bombCount:  " + surroundingsCounter);
+            setNumber(surroundingsCounter);
+            revealEmptys(surroundingsArray);
         }
         else
         {
-            this.setNumber(bombCount);
+            this.setNumber(surroundingsCounter);
             leftClickedStatus = true;
         }
     }
 
+
+    /**
+	 * Gets the next surrounding square and adds to surroundingsArray
+	 * 
+	 * @param x the int added to square x coordinate to get surrounding square
+	 * @param y the int added to square y coordinate to get surrounding square
+	 */	
     public void addToArrray(int x, int y)
     {
         int aX = this.getXLocation()+ x;
         int aY = this.getYLocation()+ y;
-
-        System.out.println("aX ==>  " + (aX + x));
-        System.out.println("aY ==>  " + (aY + y));
 
         BombSquare current = (BombSquare) board.getSquareAt(aX, aY);
 
         this.surroundingsArray.add(current);
     }
 
-    public void revealEmptys()
+    /**
+	 * reveales all empty, adjacent squares to members of ArrayList
+	 * 
+	 * @param parentList ArrayList of the square's surrounding squares
+	 */	
+    public void revealEmptys(ArrayList<BombSquare> parentList)
     {
-        //adds surrounding squares to the surroundingsArray
-        
-        surroundingBombs();
-
-        for(BombSquare square: this.surroundingsArray)
+        for(BombSquare square: parentList)
         {
-            //for every bomb square, if false then return out of method, else print blank icon on all 
-            if(square.emptyStatus == false)
+            square.setNumber(square.surroundingsCounter);
+
+            square.surroundingsCounter();
+
+            while(square.surroundingsCounter == 0)
             {
-                return;
+                square.surroundingsCounter();
+                for(BombSquare s: square.surroundingsArray)
+                {
+                    revealEmptys(s.surroundingsArray);
+                }
             }
         }
-        for(BombSquare square: this.surroundingsArray)
-        {
-            square.setNumber(surroundingsCounter());
-        }
-        revealEmptys();
+
     }
 }
